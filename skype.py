@@ -101,7 +101,7 @@ if __name__ == "__main__":
     extractor = SkypeWebExtractor()
     
     try:
-        extractor.login("yaoandersonkouassi31@gmail.com", "Mon_compte_skype")
+        extractor.login("mail@gmail.com", "compte_skype_pwd")
         time.sleep(5)  # Attendre que tout soit bien chargé
         
         extractor.extract_conversations()
