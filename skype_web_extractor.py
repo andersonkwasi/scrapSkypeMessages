@@ -83,11 +83,31 @@ class SkypeWebExtractor:
                     logging.info(f"Extraction conversation {i}/{len(conversation_list)}")
                     conv.click()
 
-                    # Attendre que les messages soient visibles sans utiliser time.sleep()
-                    message_divs = WebDriverWait(self.driver, 30).until(
-                        EC.presence_of_all_elements_located((By.XPATH, "//div[@role='region']"))
+                    # Attendre que les messages soient visibles
+                    WebDriverWait(self.driver, 30).until(
+                        EC.presence_of_element_located((By.XPATH, "//div[@role='region']"))
                     )
 
+                    # Défilement pour charger les messages récents
+                    previous_message_count = 0
+                    while True:
+                        # Attendre un peu pour le chargement
+                        time.sleep(2)
+                        
+                        # Trouver tous les messages actuellement visibles
+                        message_divs = self.driver.find_elements(By.XPATH, "//div[@role='region']")
+
+                        # Vérifier le nombre de messages
+                        current_message_count = len(message_divs)
+                        if current_message_count > previous_message_count:
+                            previous_message_count = current_message_count
+                        else:
+                            break  # Sortir si aucun nouveau message n'a été chargé
+
+                        # Faire défiler vers le bas pour charger plus de messages
+                        self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", message_divs[-1])
+
+                    # Extraire les messages après le défilement
                     for msg_div in message_divs:
                         name, content, timestamp = self.extract_message_info(msg_div)
 
@@ -99,7 +119,8 @@ class SkypeWebExtractor:
                             self.messages.append({
                                 "Nom": name,
                                 "Message": content,
-                                "Heure": timestamp
+                                "Heure": timestamp,
+                                "Date d'extraction": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                             })
                             self.unique_messages.add(message_id)
 
@@ -115,28 +136,39 @@ class SkypeWebExtractor:
             logging.error(f"Erreur lors de la recherche des conversations : {e}")
             raise e
 
-    def export_to_excel(self, filename=None):
+    def read_existing_data(self):
         """
-        Exporte les messages extraits dans un fichier Excel.
-
-        Args:
-            filename (str, optional): Le nom du fichier Excel. Si aucun nom n'est fourni, un nom par défaut est généré.
+        Lit les données existantes dans le fichier Excel s'il existe.
 
         Returns:
-            str: Le nom du fichier Excel généré.
+            list: Liste de dictionnaires contenant les messages existants.
         """
-        if filename is None:
-            filename = f"skype_messages_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-
         try:
-            df = pd.DataFrame(self.messages)
-            df.to_excel(filename, index=False)
-            logging.info(f"Messages exportés vers {filename}")
-            print(f"Messages exportés vers {filename}")
-            return filename
-        except Exception as e:
-            logging.error(f"Erreur lors de l'exportation vers Excel : {e}")
-            raise e
+            existing_data = pd.read_excel('skypeMessages.xlsx')
+            return existing_data.to_dict(orient='records')
+        except FileNotFoundError:
+            logging.info("Aucun fichier Excel existant trouvé, création d'un nouveau fichier.")
+            return []  # Aucun fichier trouvé, retourne une liste vide
+
+    def export_to_excel(self):
+        """
+        Exporte les messages extraits vers un fichier Excel, en ajoutant aux données existantes.
+        """
+        existing_messages = self.read_existing_data()  # Lire les messages existants
+
+        # Convertir la liste de messages existants en un ensemble pour éviter les doublons
+        existing_message_ids = {f"{msg['Nom']}_{msg['Message']}_{msg['Heure']}" for msg in existing_messages}
+
+        # Ajouter les nouveaux messages, en évitant les doublons
+        for message in self.messages:
+            message_id = f"{message['Nom']}_{message['Message']}_{message['Heure']}"
+            if message_id not in existing_message_ids:
+                existing_messages.append(message)
+
+        # Créer un DataFrame et l'écrire dans le fichier Excel
+        df = pd.DataFrame(existing_messages)
+        df.to_excel('skypeMessages.xlsx', index=False)
+        logging.info("Messages exportés vers skypeMessages.xlsx.")
 
     def close(self):
         """
@@ -153,7 +185,7 @@ if __name__ == "__main__":
     try:
         extractor.login()  # L'utilisateur saisit ses identifiants directement dans Skype Web.
         extractor.extract_conversations(limit=10)  # Limiter à 10 conversations
-        extractor.export_to_excel()  # Exporter au format Excel
+        extractor.export_to_excel()  # Exporter dans le fichier skypeMessages.xlsx
     except Exception as e:
         print(f"Erreur: {str(e)}")
     finally:
