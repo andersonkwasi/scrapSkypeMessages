@@ -1,101 +1,72 @@
-# Skype Web Message Extractor
+# Skype Web Extractor
 
 ## Description
+Ce projet contient un script Python qui utilise Selenium pour extraire automatiquement les messages de conversations Skype via l'interface web de Skype. Il se connecte à votre compte Skype, parcourt toutes les conversations visibles, extrait les messages et les exporte dans un fichier Excel.
 
-Le **Skype Web Message Extractor** est un script Python automatisé qui utilise Selenium pour extraire des messages à partir de conversations Skype Web. Le script permet de se connecter à Skype Web, d'extraire un nombre limité de conversations et d'exporter les messages au format Excel (.xlsx) pour analyse et archivage.
-
-### Fonctionnalités :
+## Fonctionnalités
 - Connexion à Skype Web via Selenium (l'utilisateur saisit ses identifiants manuellement sur l'interface Skype).
 - Extraction d'un nombre limité de conversations (par défaut : 10).
 - Extraction des messages sans duplication grâce à un identifiant unique basé sur l'expéditeur, le contenu et l'heure.
 - Exportation des messages extraits au format Excel.
 
 ## Prérequis
+- Python 3.6+
+- Chrome ou Chromium
+- ChromeDriver (assurez-vous qu'il correspond à la version de votre Chrome)
 
-Avant de pouvoir utiliser ce script, assurez-vous que les logiciels et modules suivants sont installés sur votre machine :
+## Installation
 
-- **Python 3.x** (disponible ici : https://www.python.org/downloads/)
-- **Google Chrome** (le script utilise le navigateur Chrome)
-- **ChromeDriver** : Un composant essentiel qui permet à Selenium de contrôler Chrome. Assurez-vous que la version de ChromeDriver correspond à celle de Chrome installée sur votre machine. Vous pouvez télécharger ChromeDriver ici : https://sites.google.com/a/chromium.org/chromedriver/downloads
+1. Clonez ce dépôt ou téléchargez le script `skype_web_extractor.py`.
 
-Vous pouvez vérifier la version de Chrome installée en utilisant cette commande :
+2. Installez les dépendances nécessaires :
+   ```
+   pip install selenium pandas tqdm openpyxl
+   ```
 
-```bash
-google-chrome --version
+3. Téléchargez ChromeDriver depuis [le site officiel](https://sites.google.com/a/chromium.org/chromedriver/downloads) et placez-le dans votre PATH ou dans le même dossier que le script.
 
 
-- ** Installation des modules Python nécessaires :**
+## Utilisation
 
-Le script utilise plusieurs modules Python, notamment Selenium, pandas et tqdm. Vous pouvez installer ces modules en utilisant pip :
+1. Ouvrez un terminal et naviguez jusqu'au dossier contenant le script.
 
-bash
+2. Exécutez le script :
+   ```
+   python3 skype_web_extractor.py
+   ```
 
- pip install selenium pandas tqdm openpyxl
+3. Le script va :
+   - Ouvrir une fenêtre Chrome automatiquement une fenêtre Chrome et se dirigera vers la page de connexion Skype Web.
+   - Saisissez vos identifiants Skype dans l'interface, puis attendez que les messages se chargent.
+   - Parcourir toutes les conversations visibles
+   - Extraire les messages
+   - Exporter les messages dans un fichier CSV nommé `skype_messages_YYYYMMDD_HHMMSS.csv`
 
-openpyxl est nécessaire pour l'exportation en format Excel.
-Installation
+4. Une fois l'exécution terminée, vous trouverez le fichier Excel dans le même dossier que le script.
 
-    Téléchargement de ChromeDriver :
-        Téléchargez la version correspondante de ChromeDriver à partir de ChromeDriver.
-        Extrayez le fichier téléchargé et placez-le dans un répertoire de votre choix.
-        Ajoutez le répertoire contenant chromedriver à votre PATH système, ou placez-le dans le répertoire où vous allez exécuter le script.
+5. Extraction des conversations :
 
-    Configuration du projet :
-        Clonez ce projet ou téléchargez les fichiers sources.
-        Assurez-vous d'avoir Python 3.x et les modules requis installés.
+    Par défaut, le script extrait jusqu'à 10 conversations. Ce paramètre peut être modifié dans la fonction extract_conversations en changeant la valeur de limit.
 
-Utilisation
 
-    Exécution du script :
-        Ouvrez un terminal dans le répertoire contenant le script skype.py.
-        Exécutez le script avec la commande suivante :
+![alt text](<Capture d’écran du 2024-10-18 00-28-17.png>)
 
-    bash
 
-    python skype.py
+## Remarques
 
-    Connexion :
-        Le script ouvrira automatiquement une fenêtre Chrome et se dirigera vers la page de connexion Skype Web.
-        Saisissez vos identifiants Skype dans l'interface, puis attendez que les messages se chargent.
-        Une fois connecté et les messages chargés, appuyez sur Entrée dans le terminal pour commencer l'extraction des conversations.
+- Le script peut prendre un certain temps à s'exécuter, surtout si vous avez de nombreuses conversations ou messages.
+- Assurez-vous d'avoir une connexion Internet stable pendant l'exécution du script.
+- Le script peut nécessiter des ajustements en fonction des mises à jour de l'interface Skype Web.
 
-    Extraction des conversations :
-        Par défaut, le script extrait jusqu'à 10 conversations. Ce paramètre peut être modifié dans la fonction extract_conversations en changeant la valeur de limit.
-        Les messages sont extraits sans duplication, même si le même message apparaît plusieurs fois dans différentes parties de la conversation.
+## Dépannage
 
-    Exportation des messages :
-        Les messages extraits sont automatiquement exportés dans un fichier Excel (.xlsx) nommé selon la date et l'heure actuelles, par exemple : skype_messages_20241017_232854.xlsx.
-        Le fichier est généré dans le même répertoire où le script est exécuté.
+- Si le script échoue à se connecter, vérifiez vos identifiants et assurez-vous que vous pouvez vous connecter manuellement à Skype Web.
+- Si le script ne parvient pas à trouver certains éléments, il peut être nécessaire d'ajuster les sélecteurs CSS ou XPath utilisés dans le code.
 
-Exemple d'exportation
+## Contribution
 
-Voici un exemple de format de fichier exporté :
-Nom	Message	Heure
-John Doe	Hello! How are you?	12:45 PM
-Jane Doe	I'm good, thank you!	12:46 PM
-John Doe	Let's meet tomorrow at 10 AM.	12:50 PM
-Journalisation
+Les contributions à ce projet sont les bienvenues. N'hésitez pas à ouvrir une issue ou à soumettre une pull request.
 
-Le script enregistre les actions et les erreurs dans un fichier de log nommé skype_extractor.log. Ce fichier peut être utilisé pour déboguer ou vérifier l'état du processus d'extraction.
-Remarques
+## Licence
 
-    Le script est conçu pour fonctionner avec Google Chrome et Skype Web. Si vous utilisez un autre navigateur, des modifications seront nécessaires.
-    Si une conversation contient de nombreux messages, cela peut prendre un certain temps pour les charger tous. Soyez patient.
-    Si vous avez des erreurs avec ChromeDriver, assurez-vous que la version de ChromeDriver correspond à la version de Google Chrome installée sur votre machine.
-
-Limitations
-
-    Le script extrait actuellement un nombre limité de conversations (par défaut 10). Cette limite peut être modifiée dans le code en ajustant le paramètre limit.
-    Le script ne gère pas la pagination automatique pour les conversations qui s'étendent sur plusieurs pages dans l'interface Skype Web.
-
-Améliorations futures
-
-    Ajouter la gestion de la pagination pour extraire des messages de très longues conversations.
-    Ajouter des options de ligne de commande pour définir le nombre de conversations à extraire ou le format d'exportation.
-    Supporter d'autres formats d'exportation comme JSON ou CSV.
-
-Auteur
-
-Ce script a été développé par AndersonKwsy pour faciliter l'extraction de messages depuis Skype Web.
-
-N'hésitez pas à me contacter pour toute question ou assistance concernant ce projet.
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
